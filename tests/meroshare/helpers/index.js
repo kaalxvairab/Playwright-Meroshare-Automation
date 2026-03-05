@@ -3,13 +3,14 @@
  * Central export point for all helper modules
  */
 
-const login = require('./login');
-const navigation = require('./navigation');
-const common = require('./common');
-const asba = require('./asba');
-const ipo = require('./ipo');
-const telegram = require('./telegram');
-const retry = require('./retry');
+const login = require("./login");
+const navigation = require("./navigation");
+const common = require("./common");
+const asba = require("./asba");
+const ipo = require("./ipo");
+const telegram = require("./telegram");
+const whatsapp = require("./whatsapp");
+const retry = require("./retry");
 
 module.exports = {
   ...login,
@@ -18,6 +19,6 @@ module.exports = {
   ...asba,
   ...ipo,
   ...telegram,
+  ...whatsapp,
   ...retry,
 };
-

@@ -3,15 +3,15 @@ name: MeroShare IPO Automation
 on:
   # Run daily at 9:00 AM Nepal Time (UTC+5:45) = 3:15 AM UTC
   schedule:
-    - cron: '15 3 * * *'  # 9:00 AM NPT (Nepal Time)
-  
+    - cron: "15 3 * * *" # 9:00 AM NPT (Nepal Time)
+
   # Allow manual triggering for testing
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Run mode'
+        description: "Run mode"
         required: false
-        default: 'multi'
+        default: "multi"
         type: choice
         options:
           - single
@@ -20,23 +20,23 @@ on:
 jobs:
   automate:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-      
+          node-version: "18"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      
+
       - name: Run MeroShare automation (Multi-User)
         if: ${{ github.event.inputs.mode != 'single' }}
         env:
@@ -143,6 +143,12 @@ jobs:
           # Telegram
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # WhatsApp (Twilio)
+          WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
+          WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
         run: npm run automate:multi
 
       - name: Run MeroShare automation (Single User)
@@ -158,5 +164,9 @@ jobs:
           MEROSHARE_TXN_PIN: ${{ secrets.MEROSHARE_TXN_PIN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
+          WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
         run: npm run automate
-
