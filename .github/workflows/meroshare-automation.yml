@@ -141,14 +141,15 @@ jobs:
           USER10_CRN: ${{ secrets.USER10_CRN }}
           USER10_TXN_PIN: ${{ secrets.USER10_TXN_PIN }}
           # Telegram
+          TELEGRAM_ENABLED: ${{ secrets.TELEGRAM_ENABLED }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          # WhatsApp (Twilio)
+          # WhatsApp (CallMeBot)
           WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
-          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-          TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
-          WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
+          WHATSAPP_PROVIDER: ${{ secrets.WHATSAPP_PROVIDER }}
+          WHATSAPP_ENDPOINT: ${{ secrets.WHATSAPP_ENDPOINT }}
+          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
         run: npm run automate:multi
 
       - name: Run MeroShare automation (Single User)
@@ -162,11 +163,12 @@ jobs:
           MEROSHARE_KITTA_N0: ${{ secrets.MEROSHARE_KITTA_N0 }}
           MEROSHARE_CRN_NO: ${{ secrets.MEROSHARE_CRN_NO }}
           MEROSHARE_TXN_PIN: ${{ secrets.MEROSHARE_TXN_PIN }}
+          TELEGRAM_ENABLED: ${{ secrets.TELEGRAM_ENABLED }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
-          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-          TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
-          WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
+          WHATSAPP_PROVIDER: ${{ secrets.WHATSAPP_PROVIDER }}
+          WHATSAPP_ENDPOINT: ${{ secrets.WHATSAPP_ENDPOINT }}
+          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
         run: npm run automate

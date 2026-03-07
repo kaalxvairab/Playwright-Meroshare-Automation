@@ -55,15 +55,16 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
    MEROSHARE_TXN_PIN=your_4_digit_pin
 
    # Telegram Bot (for notifications)
+   TELEGRAM_ENABLED=true
    TELEGRAM_BOT_TOKEN=your_telegram_bot_token
    TELEGRAM_CHAT_ID=your_telegram_chat_id
 
-   # WhatsApp (Twilio)
+   # WhatsApp (CallMeBot)
    WHATSAPP_ENABLED=true
-   TWILIO_ACCOUNT_SID=your_twilio_account_sid
-   TWILIO_AUTH_TOKEN=your_twilio_auth_token
-   TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
-   WHATSAPP_TO=whatsapp:+97798XXXXXXXX
+   WHATSAPP_PROVIDER=callmebot
+   WHATSAPP_ENDPOINT=https://api.callmebot.com
+   WHATSAPP_PHONE=97798XXXXXXXX
+   WHATSAPP_API_KEY=your_callmebot_apikey
    ```
 
 4. **Setup Telegram Bot:**
@@ -129,11 +130,12 @@ Add these secrets:
 - `MEROSHARE_TXN_PIN`
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
+- `TELEGRAM_ENABLED`
 - `WHATSAPP_ENABLED`
-- `TWILIO_ACCOUNT_SID`
-- `TWILIO_AUTH_TOKEN`
-- `TWILIO_WHATSAPP_FROM`
-- `WHATSAPP_TO`
+- `WHATSAPP_PROVIDER`
+- `WHATSAPP_ENDPOINT`
+- `WHATSAPP_PHONE`
+- `WHATSAPP_API_KEY`
 
 #### Option 2: Automated Setup (OpenTofu / Terraform)
 
@@ -174,7 +176,7 @@ If you want to manage secrets as code, use the `infra/` folder:
 │       ├── asba.js            # IPO detection & verification
 │       ├── ipo.js             # Form filling & submission
 │       ├── telegram.js        # Telegram notifications
-│       ├── whatsapp.js        # WhatsApp notifications (Twilio)
+│       ├── whatsapp.js        # WhatsApp notifications (CallMeBot)
 │       └── common.js          # Utilities
 ├── .github/workflows/
 │   └── meroshare-automation.yml
@@ -190,7 +192,7 @@ If you want to manage secrets as code, use the `infra/` folder:
 - ✅ Share verification (Value Per Unit & Min Unit)
 - ✅ Auto-fill IPO application form
 - ✅ Telegram notifications
-- ✅ WhatsApp notifications (Twilio)
+- ✅ WhatsApp notifications (CallMeBot)
 - ✅ GitHub Actions scheduled automation
 - ✅ Element-based waits (reliable)
 

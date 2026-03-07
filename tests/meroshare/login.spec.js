@@ -67,6 +67,8 @@ test.describe("MeroShare IPO Automation", () => {
     const username = process.env.MEROSHARE_USERNAME;
     const password = process.env.MEROSHARE_PASSWORD;
     const dp = process.env.MEROSHARE_DP_NP;
+    const telegramEnabled =
+      String(process.env.TELEGRAM_ENABLED ?? "false").toLowerCase() === "true";
     const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
     const telegramChatId = process.env.TELEGRAM_CHAT_ID;
     const whatsappEnabled = initWhatsApp();
@@ -82,13 +84,15 @@ test.describe("MeroShare IPO Automation", () => {
     }
 
     // Initialize Telegram bot (but don't send any messages yet)
-    if (telegramToken) {
+    if (telegramEnabled && telegramToken) {
       try {
         initBot(telegramToken);
         console.log("Telegram bot initialized successfully");
       } catch (error) {
         console.error("Failed to initialize Telegram bot:", error.message);
       }
+    } else if (!telegramEnabled) {
+      console.log("Telegram notifications disabled via TELEGRAM_ENABLED");
     }
 
     // Track IPO details for final notification
@@ -336,7 +340,7 @@ test.describe("MeroShare IPO Automation", () => {
           const companyName = ipoDetails?.companyName || "IPO";
           const detailMessage = `✅ ${companyName} IPO application submitted successfully!`;
 
-          if (telegramChatId && telegramToken) {
+          if (telegramEnabled && telegramChatId && telegramToken) {
             await notifyIPOStatus(telegramChatId, "success", detailMessage);
           }
           if (whatsappEnabled) {
@@ -351,7 +355,7 @@ test.describe("MeroShare IPO Automation", () => {
             `Please apply manually at https://meroshare.cdsc.com.np\n\n` +
             `We apologize for the inconvenience.`;
 
-          if (telegramChatId && telegramToken) {
+          if (telegramEnabled && telegramChatId && telegramToken) {
             await notifyError(telegramChatId, detailMessage);
           }
           if (whatsappEnabled) {
@@ -368,7 +372,7 @@ test.describe("MeroShare IPO Automation", () => {
             reason: failureReason,
           };
 
-          if (telegramChatId && telegramToken) {
+          if (telegramEnabled && telegramChatId && telegramToken) {
             await notifyIPOOpenForReview(telegramChatId, reviewPayload);
           }
           if (whatsappEnabled) {
@@ -383,7 +387,7 @@ test.describe("MeroShare IPO Automation", () => {
             `${failureReason}\n\n` +
             `Please check your MeroShare account to verify if the application was submitted.`;
 
-          if (telegramChatId && telegramToken) {
+          if (telegramEnabled && telegramChatId && telegramToken) {
             await notifyError(telegramChatId, detailMessage);
           }
           if (whatsappEnabled) {
@@ -396,7 +400,7 @@ test.describe("MeroShare IPO Automation", () => {
           const appliedCompany = ipoDetails?.companyName || "IPO";
           const detailMessage = `✅ ${appliedCompany} IPO already applied!\n\nYour application was previously submitted.`;
 
-          if (telegramChatId && telegramToken) {
+          if (telegramEnabled && telegramChatId && telegramToken) {
             await notifyIPOStatus(telegramChatId, "success", detailMessage);
           }
           if (whatsappEnabled) {
@@ -406,7 +410,7 @@ test.describe("MeroShare IPO Automation", () => {
         }
 
         case "no_ipo":
-          if (telegramChatId && telegramToken) {
+          if (telegramEnabled && telegramChatId && telegramToken) {
             await notifyIPONotFound(telegramChatId);
           }
           if (whatsappEnabled) {

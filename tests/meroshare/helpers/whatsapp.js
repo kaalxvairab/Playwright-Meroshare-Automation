@@ -1,5 +1,5 @@
 /**
- * WhatsApp helper functions for notifications via Twilio WhatsApp API
+ * WhatsApp helper functions for notifications via CallMeBot WhatsApp API
  */
 
 let whatsappConfig = null;
@@ -20,14 +20,32 @@ function initWhatsApp(config = {}) {
     return false;
   }
 
-  const accountSid = config.accountSid || process.env.TWILIO_ACCOUNT_SID;
-  const authToken = config.authToken || process.env.TWILIO_AUTH_TOKEN;
-  const from = config.from || process.env.TWILIO_WHATSAPP_FROM;
-  const to = config.to || process.env.WHATSAPP_TO;
+  const provider = String(
+    config.provider ?? process.env.WHATSAPP_PROVIDER ?? "callmebot",
+  ).toLowerCase();
+  const endpoint =
+    config.endpoint ||
+    process.env.WHATSAPP_ENDPOINT ||
+    process.env.WWATSAPP_CALLMEBOT_URL ||
+    "https://api.callmebot.com";
+  const phone =
+    config.phone || process.env.WHATSAPP_PHONE || process.env.WHATSAPP_TO;
+  const apiKey =
+    config.apiKey ||
+    process.env.WHATSAPP_API_KEY ||
+    process.env.WHATSAPP_CALLMEBOT_API_KEY;
 
-  if (!accountSid || !authToken || !from || !to) {
+  if (provider !== "callmebot") {
     console.error(
-      "WhatsApp is enabled but missing Twilio configuration variables.",
+      `Unsupported WhatsApp provider: ${provider}. Supported provider: callmebot`,
+    );
+    whatsappConfig = { enabled: false };
+    return false;
+  }
+
+  if (!phone || !apiKey) {
+    console.error(
+      "WhatsApp is enabled but missing CallMeBot configuration variables (WHATSAPP_PHONE/WHATSAPP_TO and WHATSAPP_API_KEY/WHATSAPP_CALLMEBOT_API_KEY).",
     );
     whatsappConfig = { enabled: false };
     return false;
@@ -35,10 +53,10 @@ function initWhatsApp(config = {}) {
 
   whatsappConfig = {
     enabled: true,
-    accountSid,
-    authToken,
-    from,
-    to,
+    provider,
+    endpoint,
+    phone: String(phone).replace(/\D/g, ""),
+    apiKey,
   };
 
   return true;
@@ -49,7 +67,74 @@ function formatForWhatsApp(message) {
     .replace(/\*/g, "")
     .replace(/_/g, "")
     .replace(/`/g, "")
+    .replace(/\r\n/g, "\n")
     .trim();
+}
+
+function splitWhatsAppMessage(message, chunkSize = 900) {
+  const clean = formatForWhatsApp(message);
+
+  if (clean.length <= chunkSize) {
+    return [clean];
+  }
+
+  const chunks = [];
+  let current = "";
+  const lines = clean.split("\n");
+
+  for (const line of lines) {
+    const candidate = current ? `${current}\n${line}` : line;
+    if (candidate.length <= chunkSize) {
+      current = candidate;
+      continue;
+    }
+
+    if (current) {
+      chunks.push(current);
+      current = "";
+    }
+
+    if (line.length <= chunkSize) {
+      current = line;
+      continue;
+    }
+
+    for (let i = 0; i < line.length; i += chunkSize) {
+      chunks.push(line.slice(i, i + chunkSize));
+    }
+  }
+
+  if (current) {
+    chunks.push(current);
+  }
+
+  return chunks;
+}
+
+async function sendViaCallMeBot(message) {
+  const endpoint = String(whatsappConfig.endpoint || "").trim();
+  const baseUrl = endpoint.includes("whatsapp.php")
+    ? endpoint
+    : `${endpoint.replace(/\/$/, "")}/whatsapp.php`;
+
+  const query = new URLSearchParams({
+    phone: whatsappConfig.phone,
+    text: message,
+    apikey: whatsappConfig.apiKey,
+  });
+
+  const url = `${baseUrl}?${query.toString()}`;
+  const response = await fetch(url, { method: "GET" });
+
+  const rawBody = await response.text();
+  const body = rawBody.trim();
+  const looksOk = body.toLowerCase().includes("sent");
+
+  if (!response.ok || !looksOk) {
+    throw new Error(
+      `CallMeBot send failed (${response.status}): ${body || "No response body"}`,
+    );
+  }
 }
 
 /**
@@ -65,35 +150,18 @@ async function sendWhatsAppText(message) {
     return;
   }
 
-  const url = `https://api.twilio.com/2010-04-01/Accounts/${whatsappConfig.accountSid}/Messages.json`;
-  const body = new URLSearchParams({
-    From: whatsappConfig.from,
-    To: whatsappConfig.to,
-    Body: formatForWhatsApp(message),
-  });
-
-  const auth = Buffer.from(
-    `${whatsappConfig.accountSid}:${whatsappConfig.authToken}`,
-  ).toString("base64");
-
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body,
-    });
+    const chunks = splitWhatsAppMessage(message);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `WhatsApp send failed (${response.status}): ${errorText}`,
-      );
+    for (const chunk of chunks) {
+      if (whatsappConfig.provider === "callmebot") {
+        await sendViaCallMeBot(chunk);
+      }
     }
 
-    console.log("WhatsApp notification sent successfully");
+    console.log(
+      `WhatsApp notification sent successfully via ${whatsappConfig.provider}`,
+    );
   } catch (error) {
     console.error("Failed to send WhatsApp message:", error.message);
   }

@@ -33,24 +33,28 @@ test.describe("MeroShare Multi-User IPO Automation", () => {
   test("should check for IPO and auto-apply for all users", async ({
     browser,
   }) => {
+    const telegramEnabled =
+      String(telegram.enabled ?? "false").toLowerCase() === "true";
     const telegramToken = telegram.token;
     const telegramChatId = telegram.chatId;
     const whatsappReady = initWhatsApp(whatsapp);
 
     // Initialize Telegram bot once
-    if (telegramToken) {
+    if (telegramEnabled && telegramToken) {
       try {
         initBot(telegramToken);
         console.log("Telegram bot initialized successfully");
       } catch (error) {
         console.error("Failed to initialize Telegram bot:", error.message);
       }
+    } else if (!telegramEnabled) {
+      console.log("Telegram notifications disabled via TELEGRAM_ENABLED");
     }
 
     // Check if any valid users exist
     if (!users || users.length === 0) {
       console.log("No valid users configured. Please check users.config.js");
-      if (telegramChatId && telegramToken) {
+      if (telegramEnabled && telegramChatId && telegramToken) {
         await notifyError(
           telegramChatId,
           "No valid users configured for IPO automation.",
@@ -334,7 +338,7 @@ test.describe("MeroShare Multi-User IPO Automation", () => {
     }
 
     // Send consolidated notifications
-    if (telegramChatId && telegramToken) {
+    if (telegramEnabled && telegramChatId && telegramToken) {
       await sendMultiUserNotification(
         telegramChatId,
         results,

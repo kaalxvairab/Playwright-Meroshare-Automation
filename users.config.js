@@ -136,14 +136,17 @@ const validUsers = users.filter(
 module.exports = {
   users: validUsers,
   telegram: {
+    enabled: process.env.TELEGRAM_ENABLED,
     token: process.env.TELEGRAM_BOT_TOKEN,
     chatId: process.env.TELEGRAM_CHAT_ID,
   },
   whatsapp: {
     enabled: process.env.WHATSAPP_ENABLED,
-    accountSid: process.env.TWILIO_ACCOUNT_SID,
-    authToken: process.env.TWILIO_AUTH_TOKEN,
-    from: process.env.TWILIO_WHATSAPP_FROM,
-    to: process.env.WHATSAPP_TO,
+    provider: process.env.WHATSAPP_PROVIDER,
+    endpoint:
+      process.env.WHATSAPP_ENDPOINT || process.env.WWATSAPP_CALLMEBOT_URL,
+    phone: process.env.WHATSAPP_PHONE || process.env.WHATSAPP_TO,
+    apiKey:
+      process.env.WHATSAPP_API_KEY || process.env.WHATSAPP_CALLMEBOT_API_KEY,
   },
 };
