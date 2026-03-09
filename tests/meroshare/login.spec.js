@@ -17,11 +17,11 @@ const {
   notifyError,
   notifyIPONotFound,
   notifyIPOOpenForReview,
-  initWhatsApp,
   notifyIPOStatusWhatsApp,
   notifyErrorWhatsApp,
   notifyIPONotFoundWhatsApp,
   notifyIPOOpenForReviewWhatsApp,
+  initWhatsApp,
   // Retry utilities for high traffic scenarios
   navigateWithRetry,
   waitForElementWithRetry,

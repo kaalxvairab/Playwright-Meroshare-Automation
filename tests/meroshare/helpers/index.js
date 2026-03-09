@@ -10,6 +10,7 @@ const asba = require("./asba");
 const ipo = require("./ipo");
 const telegram = require("./telegram");
 const whatsapp = require("./whatsapp");
+const notifications = require("./notifications");
 const retry = require("./retry");
 
 module.exports = {
@@ -20,5 +21,6 @@ module.exports = {
   ...ipo,
   ...telegram,
   ...whatsapp,
+  ...notifications,
   ...retry,
 };

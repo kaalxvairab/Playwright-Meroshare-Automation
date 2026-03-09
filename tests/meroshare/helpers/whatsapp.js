@@ -20,32 +20,13 @@ function initWhatsApp(config = {}) {
     return false;
   }
 
-  const provider = String(
-    config.provider ?? process.env.WHATSAPP_PROVIDER ?? "callmebot",
-  ).toLowerCase();
-  const endpoint =
-    config.endpoint ||
-    process.env.WHATSAPP_ENDPOINT ||
-    process.env.WWATSAPP_CALLMEBOT_URL ||
-    "https://api.callmebot.com";
-  const phone =
-    config.phone || process.env.WHATSAPP_PHONE || process.env.WHATSAPP_TO;
-  const apiKey =
-    config.apiKey ||
-    process.env.WHATSAPP_API_KEY ||
-    process.env.WHATSAPP_CALLMEBOT_API_KEY;
-
-  if (provider !== "callmebot") {
-    console.error(
-      `Unsupported WhatsApp provider: ${provider}. Supported provider: callmebot`,
-    );
-    whatsappConfig = { enabled: false };
-    return false;
-  }
+  const endpoint = config.endpoint || process.env.WWATSAPP_CALLMEBOT_URL;
+  const phone = config.phone || process.env.WHATSAPP_TO;
+  const apiKey = config.apiKey || process.env.WHATSAPP_CALLMEBOT_API_KEY;
 
   if (!phone || !apiKey) {
     console.error(
-      "WhatsApp is enabled but missing CallMeBot configuration variables (WHATSAPP_PHONE/WHATSAPP_TO and WHATSAPP_API_KEY/WHATSAPP_CALLMEBOT_API_KEY).",
+      "WhatsApp is enabled but missing CallMeBot configuration (WHATSAPP_TO and WHATSAPP_CALLMEBOT_API_KEY).",
     );
     whatsappConfig = { enabled: false };
     return false;
@@ -53,7 +34,6 @@ function initWhatsApp(config = {}) {
 
   whatsappConfig = {
     enabled: true,
-    provider,
     endpoint,
     phone: String(phone).replace(/\D/g, ""),
     apiKey,
@@ -173,14 +153,10 @@ async function sendWhatsAppText(message) {
     const chunks = splitWhatsAppMessage(message);
 
     for (const chunk of chunks) {
-      if (whatsappConfig.provider === "callmebot") {
-        await sendViaCallMeBot(chunk);
-      }
+      await sendViaCallMeBot(chunk);
     }
 
-    console.log(
-      `WhatsApp notification sent successfully via ${whatsappConfig.provider}`,
-    );
+    console.log(`WhatsApp notification sent successfully`);
   } catch (error) {
     console.error("Failed to send WhatsApp message:", error.message);
   }

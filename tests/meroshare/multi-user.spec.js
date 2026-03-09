@@ -20,7 +20,6 @@ const {
   notifyIPOOpenForReview,
   initWhatsApp,
   sendWhatsAppText,
-  formatForWhatsApp,
   navigateWithRetry,
   waitForElementWithRetry,
   retryWithBackoff,
@@ -353,7 +352,7 @@ test.describe("MeroShare Multi-User IPO Automation", () => {
         results,
         cachedIpoDetails,
         async (_chatId, message) => {
-          await sendWhatsAppText(formatForWhatsApp(message));
+          await sendWhatsAppText(message);
         },
       );
     }
