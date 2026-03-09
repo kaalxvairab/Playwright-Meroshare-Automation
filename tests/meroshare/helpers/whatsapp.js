@@ -128,9 +128,28 @@ async function sendViaCallMeBot(message) {
 
   const rawBody = await response.text();
   const body = rawBody.trim();
-  const looksOk = body.toLowerCase().includes("sent");
+  const bodyLower = body.toLowerCase();
+  const hasOutageSignal =
+    bodyLower.includes("service is down") || bodyLower.includes("(410)");
+  const hasFailureSignal =
+    hasOutageSignal ||
+    bodyLower.includes("error") ||
+    bodyLower.includes("invalid") ||
+    bodyLower.includes("forbidden") ||
+    bodyLower.includes("unauthorized");
+  const hasSuccessSignal =
+    bodyLower.includes("sent") ||
+    bodyLower.includes("message to:") ||
+    bodyLower.includes("text to send:") ||
+    bodyLower.includes("queued");
 
-  if (!response.ok || !looksOk) {
+  if (hasOutageSignal) {
+    throw new Error(
+      `CallMeBot service outage detected (${response.status}): ${body || "No response body"}`,
+    );
+  }
+
+  if (!response.ok || hasFailureSignal || !hasSuccessSignal) {
     throw new Error(
       `CallMeBot send failed (${response.status}): ${body || "No response body"}`,
     );
