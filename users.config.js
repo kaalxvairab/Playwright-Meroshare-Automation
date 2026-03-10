@@ -142,11 +142,8 @@ module.exports = {
   },
   whatsapp: {
     enabled: process.env.WHATSAPP_ENABLED,
-    provider: process.env.WHATSAPP_PROVIDER,
-    endpoint:
-      process.env.WHATSAPP_ENDPOINT || process.env.WWATSAPP_CALLMEBOT_URL,
-    phone: process.env.WHATSAPP_PHONE || process.env.WHATSAPP_TO,
-    apiKey:
-      process.env.WHATSAPP_API_KEY || process.env.WHATSAPP_CALLMEBOT_API_KEY,
+    endpoint: process.env.WHATSAPP_CALLMEBOT_URL,
+    phone: process.env.WHATSAPP_TO,
+    apiKey: process.env.WHATSAPP_CALLMEBOT_API_KEY,
   },
 };
