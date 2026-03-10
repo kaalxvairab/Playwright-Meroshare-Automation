@@ -20,7 +20,7 @@ function initWhatsApp(config = {}) {
     return false;
   }
 
-  const endpoint = config.endpoint || process.env.WWATSAPP_CALLMEBOT_URL;
+  const endpoint = config.endpoint || process.env.WHATSAPP_CALLMEBOT_URL;
   const phone = config.phone || process.env.WHATSAPP_TO;
   const apiKey = config.apiKey || process.env.WHATSAPP_CALLMEBOT_API_KEY;
 
