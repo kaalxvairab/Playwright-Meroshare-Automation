@@ -3,12 +3,12 @@
  * Supports 10 users with individual credentials
  */
 
-require('dotenv').config();
+require("dotenv").config();
 
 const users = [
   // User 1 (Primary)
   {
-    name: process.env.USER1_NAME || 'User 1',
+    name: process.env.USER1_NAME || "User 1",
     username: process.env.MEROSHARE_USERNAME,
     password: process.env.MEROSHARE_PASSWORD,
     dp: process.env.MEROSHARE_DP_NP,
@@ -20,7 +20,7 @@ const users = [
   },
   // User 2
   {
-    name: process.env.USER2_NAME || 'User 2',
+    name: process.env.USER2_NAME || "User 2",
     username: process.env.USER2_USERNAME,
     password: process.env.USER2_PASSWORD,
     dp: process.env.USER2_DP,
@@ -32,7 +32,7 @@ const users = [
   },
   // User 3
   {
-    name: process.env.USER3_NAME || 'User 3',
+    name: process.env.USER3_NAME || "User 3",
     username: process.env.USER3_USERNAME,
     password: process.env.USER3_PASSWORD,
     dp: process.env.USER3_DP,
@@ -44,7 +44,7 @@ const users = [
   },
   // User 4
   {
-    name: process.env.USER4_NAME || 'User 4',
+    name: process.env.USER4_NAME || "User 4",
     username: process.env.USER4_USERNAME,
     password: process.env.USER4_PASSWORD,
     dp: process.env.USER4_DP,
@@ -56,7 +56,7 @@ const users = [
   },
   // User 5
   {
-    name: process.env.USER5_NAME || 'User 5',
+    name: process.env.USER5_NAME || "User 5",
     username: process.env.USER5_USERNAME,
     password: process.env.USER5_PASSWORD,
     dp: process.env.USER5_DP,
@@ -68,7 +68,7 @@ const users = [
   },
   // User 6
   {
-    name: process.env.USER6_NAME || 'User 6',
+    name: process.env.USER6_NAME || "User 6",
     username: process.env.USER6_USERNAME,
     password: process.env.USER6_PASSWORD,
     dp: process.env.USER6_DP,
@@ -80,7 +80,7 @@ const users = [
   },
   // User 7
   {
-    name: process.env.USER7_NAME || 'User 7',
+    name: process.env.USER7_NAME || "User 7",
     username: process.env.USER7_USERNAME,
     password: process.env.USER7_PASSWORD,
     dp: process.env.USER7_DP,
@@ -92,7 +92,7 @@ const users = [
   },
   // User 8
   {
-    name: process.env.USER8_NAME || 'User 8',
+    name: process.env.USER8_NAME || "User 8",
     username: process.env.USER8_USERNAME,
     password: process.env.USER8_PASSWORD,
     dp: process.env.USER8_DP,
@@ -104,7 +104,7 @@ const users = [
   },
   // User 9
   {
-    name: process.env.USER9_NAME || 'User 9',
+    name: process.env.USER9_NAME || "User 9",
     username: process.env.USER9_USERNAME,
     password: process.env.USER9_PASSWORD,
     dp: process.env.USER9_DP,
@@ -116,7 +116,7 @@ const users = [
   },
   // User 10
   {
-    name: process.env.USER10_NAME || 'User 10',
+    name: process.env.USER10_NAME || "User 10",
     username: process.env.USER10_USERNAME,
     password: process.env.USER10_PASSWORD,
     dp: process.env.USER10_DP,
@@ -129,15 +129,21 @@ const users = [
 ];
 
 // Filter out users with missing required credentials
-const validUsers = users.filter(user => 
-  user.username && user.password && user.dp
+const validUsers = users.filter(
+  (user) => user.username && user.password && user.dp,
 );
 
 module.exports = {
   users: validUsers,
   telegram: {
+    enabled: process.env.TELEGRAM_ENABLED,
     token: process.env.TELEGRAM_BOT_TOKEN,
     chatId: process.env.TELEGRAM_CHAT_ID,
   },
+  whatsapp: {
+    enabled: process.env.WHATSAPP_ENABLED,
+    endpoint: process.env.WHATSAPP_CALLMEBOT_URL,
+    phone: process.env.WHATSAPP_TO,
+    apiKey: process.env.WHATSAPP_CALLMEBOT_API_KEY,
+  },
 };
-

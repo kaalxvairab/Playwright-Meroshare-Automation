@@ -3,15 +3,15 @@ name: MeroShare IPO Automation
 on:
   # Run daily at 9:00 AM Nepal Time (UTC+5:45) = 3:15 AM UTC
   schedule:
-    - cron: '15 3 * * *'  # 9:00 AM NPT (Nepal Time)
-  
+    - cron: "15 3 * * *" # 9:00 AM NPT (Nepal Time)
+
   # Allow manual triggering for testing
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Run mode'
+        description: "Run mode"
         required: false
-        default: 'multi'
+        default: "multi"
         type: choice
         options:
           - single
@@ -20,23 +20,23 @@ on:
 jobs:
   automate:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-      
+          node-version: "18"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      
+
       - name: Run MeroShare automation (Multi-User)
         if: ${{ github.event.inputs.mode != 'single' }}
         env:
@@ -141,8 +141,15 @@ jobs:
           USER10_CRN: ${{ secrets.USER10_CRN }}
           USER10_TXN_PIN: ${{ secrets.USER10_TXN_PIN }}
           # Telegram
+          TELEGRAM_ENABLED: ${{ secrets.TELEGRAM_ENABLED }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # WhatsApp (CallMeBot)
+          WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
+          WHATSAPP_PROVIDER: ${{ secrets.WHATSAPP_PROVIDER }}
+          WHATSAPP_ENDPOINT: ${{ secrets.WHATSAPP_ENDPOINT }}
+          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
         run: npm run automate:multi
 
       - name: Run MeroShare automation (Single User)
@@ -156,7 +163,12 @@ jobs:
           MEROSHARE_KITTA_N0: ${{ secrets.MEROSHARE_KITTA_N0 }}
           MEROSHARE_CRN_NO: ${{ secrets.MEROSHARE_CRN_NO }}
           MEROSHARE_TXN_PIN: ${{ secrets.MEROSHARE_TXN_PIN }}
+          TELEGRAM_ENABLED: ${{ secrets.TELEGRAM_ENABLED }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
+          WHATSAPP_PROVIDER: ${{ secrets.WHATSAPP_PROVIDER }}
+          WHATSAPP_ENDPOINT: ${{ secrets.WHATSAPP_ENDPOINT }}
+          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
         run: npm run automate
-

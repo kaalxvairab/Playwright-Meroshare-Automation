@@ -20,7 +20,7 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
    - Fills form (Bank, Account, Kitta, CRN)
    - Enters Transaction PIN
    - Submits application
-6. **Sends Telegram notifications**:
+6. **Sends notifications (Telegram + WhatsApp)**:
    - ✅ Success: IPO applied
    - ⚠️ Needs Review: IPO open but didn't meet criteria
    - ❌ No IPO: Nothing available
@@ -28,32 +28,43 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
 ## Setup
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Install Playwright browsers:**
+
    ```bash
    npx playwright install chromium
    ```
 
 3. **Create `.env` file** in the project root:
+
    ```env
    # MeroShare Credentials
    MEROSHARE_USERNAME=your_username
    MEROSHARE_PASSWORD=your_password
    MEROSHARE_DP_NP=your_depository_participant
-   
+
    # IPO Application Settings
    MEROSHARE_BANK=your_bank_name
    MEROSHARE_P_ACCOUNT_NO=your_account_number
    MEROSHARE_KITTA_N0=10
    MEROSHARE_CRN_NO=your_crn_number
    MEROSHARE_TXN_PIN=your_4_digit_pin
-   
+
    # Telegram Bot (for notifications)
+   TELEGRAM_ENABLED=true
    TELEGRAM_BOT_TOKEN=your_telegram_bot_token
    TELEGRAM_CHAT_ID=your_telegram_chat_id
+
+   # WhatsApp (CallMeBot)
+   WHATSAPP_ENABLED=true
+   WHATSAPP_PROVIDER=callmebot
+   WHATSAPP_ENDPOINT=https://api.callmebot.com
+   WHATSAPP_PHONE=97798XXXXXXXX
+   WHATSAPP_API_KEY=your_callmebot_apikey
    ```
 
 4. **Setup Telegram Bot:**
@@ -61,10 +72,11 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
    - Get your bot token
    - Get your chat ID by messaging [@userinfobot](https://t.me/userinfobot)
    - **Alternative: Get Chat ID programmatically** (if the above doesn't work):
+
      ```python
      import requests
      import json
-     
+
      your_token = "XYZ"
      # Let's get your chat id! Be sure to have sent a message to your bot.
      url = 'https://api.telegram.org/bot'+str(your_token)+'/getUpdates'
@@ -72,15 +84,16 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
      myinfo = response.json()
      if response.status_code == 401:
        raise NameError('Check if your token is correct.')
-     
+
      try:
        CHAT_ID: int = myinfo['result'][1]['message']['chat']['id']
-     
+
        print('This is your Chat ID:', CHAT_ID)
-     
+
      except:
        print('Have you sent a message to your bot? Telegram bot are quite shy 🤣.')
      ```
+
    - Add both to your `.env` file
 
 ## Running
@@ -102,9 +115,11 @@ The project includes a GitHub Actions workflow that runs automatically at **9:00
 You can set up the required secrets manually or using the provided Infrastructure as Code (OpenTofu/Terraform) configuration.
 
 #### Option 1: Manual Setup
+
 Go to: **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
 Add these secrets:
+
 - `MEROSHARE_USERNAME`
 - `MEROSHARE_PASSWORD`
 - `MEROSHARE_DP_NP`
@@ -115,8 +130,15 @@ Add these secrets:
 - `MEROSHARE_TXN_PIN`
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
+- `TELEGRAM_ENABLED`
+- `WHATSAPP_ENABLED`
+- `WHATSAPP_PROVIDER`
+- `WHATSAPP_ENDPOINT`
+- `WHATSAPP_PHONE`
+- `WHATSAPP_API_KEY`
 
 #### Option 2: Automated Setup (OpenTofu / Terraform)
+
 If you want to manage secrets as code, use the `infra/` folder:
 
 1. **Prerequisites:** Install [OpenTofu](https://opentofu.org/) (recommended) or [Terraform](https://developer.hashicorp.com/terraform/downloads).
@@ -131,12 +153,14 @@ If you want to manage secrets as code, use the `infra/` folder:
    }
    ```
 4. **Deploy:**
+
    ```bash
    cd infra
    tofu init
    tofu apply -var-file="<example_secret>.tfvars"
    ```
-   *(Note: You can use `terraform` instead of `tofu` if you prefer.)*
+
+   _(Note: You can use `terraform` instead of `tofu` if you prefer.)_
 
    **Important:** Never commit `example_secret.tfvars`, `terraform.tfstate`, or `terraform.tfstate.backup` files as they contain plain-text secrets.
 
@@ -151,7 +175,8 @@ If you want to manage secrets as code, use the `infra/` folder:
 │       ├── navigation.js      # My ASBA navigation
 │       ├── asba.js            # IPO detection & verification
 │       ├── ipo.js             # Form filling & submission
-│       ├── telegram.js        # Notifications
+│       ├── telegram.js        # Telegram notifications
+│       ├── whatsapp.js        # WhatsApp notifications (CallMeBot)
 │       └── common.js          # Utilities
 ├── .github/workflows/
 │   └── meroshare-automation.yml
@@ -167,8 +192,10 @@ If you want to manage secrets as code, use the `infra/` folder:
 - ✅ Share verification (Value Per Unit & Min Unit)
 - ✅ Auto-fill IPO application form
 - ✅ Telegram notifications
+- ✅ WhatsApp notifications (CallMeBot)
 - ✅ GitHub Actions scheduled automation
 - ✅ Element-based waits (reliable)
+
 ## Resources
 
 - [Playwright Documentation](https://playwright.dev)
