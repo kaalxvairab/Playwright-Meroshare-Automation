@@ -1,0 +1,157 @@
+name: NICDDF Automation Tests
+
+on:
+  schedule:
+    # Run tests daily at 9:00 AM UTC
+    - cron: "0 9 * * *"
+
+  # Also run on push to main/master branch
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "tests/NICDDF/**"
+      - "playwright.config.js"
+      - "package.json"
+      - ".github/workflows/nicddf-automation.yml"
+
+  # Manual trigger option
+  workflow_dispatch:
+    inputs:
+      headed:
+        description: "Run tests in headed mode"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  test:
+    name: Run NICDDF Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run NICDDF tests
+        env:
+          # NICDDF Credentials from GitHub Secrets
+          NICDDF_USERNAME: ${{ secrets.NICDDF_USERNAME }}
+          NICDDF_PASSWORD: ${{ secrets.NICDDF_PASSWORD }}
+
+          # WhatsApp Notification Settings
+          WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
+          WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
+          WHATSAPP_CALLMEBOT_URL: ${{ secrets.WHATSAPP_CALLMEBOT_URL }}
+          WHATSAPP_CALLMEBOT_API_KEY: ${{ secrets.WHATSAPP_CALLMEBOT_API_KEY }}
+
+          # Telegram Notification Settings (optional)
+          TELEGRAM_ENABLED: ${{ secrets.TELEGRAM_ENABLED }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+          # CI Environment flag
+          CI: true
+        run: |
+          if [ "${{ github.event.inputs.headed }}" == "true" ]; then
+            npm run nicddf:headed
+          else
+            npm run nicddf
+          fi
+
+      - name: Generate test report
+        if: always()
+        run: npx playwright show-report || true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload test results summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
+
+      - name: Comment on PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const testResultsPath = './test-results';
+
+            if (fs.existsSync(testResultsPath)) {
+              const status = context.payload.pull_request ? '✅ Tests Passed' : '❌ Tests Failed';
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🤖 Playwright Test Results\n\n${status}\n\nCheck the artifacts for detailed report.`
+              });
+            }
+
+  notify-slack:
+    name: Notify Slack on Failure
+    runs-on: ubuntu-latest
+    needs: test
+    if: failure()
+    steps:
+      - name: Slack Notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "❌ NICDDF Automation Tests Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*NICDDF Automation Tests Failed*\n\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nRun: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+
+  notify-success:
+    name: Notify on Success
+    runs-on: ubuntu-latest
+    needs: test
+    if: success()
+    steps:
+      - name: Log Success
+        run: |
+          echo "✅ NICDDF Automation Tests Passed Successfully!"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
