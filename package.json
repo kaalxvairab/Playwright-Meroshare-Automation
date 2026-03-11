@@ -12,7 +12,9 @@
     "automate": "playwright test tests/meroshare/login.spec.js",
     "automate:headed": "playwright test tests/meroshare/login.spec.js --headed",
     "automate:multi": "playwright test tests/meroshare/multi-user.spec.js",
-    "automate:multi:headed": "playwright test tests/meroshare/multi-user.spec.js --headed"
+    "automate:multi:headed": "playwright test tests/meroshare/multi-user.spec.js --headed",
+    "nicddf": "playwright test tests/NICDDF/login.spec.js",
+    "nicddf:headed": "playwright test tests/NICDDF/login.spec.js --headed"
   },
   "keywords": [
     "playwright",
