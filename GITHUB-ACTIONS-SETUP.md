@@ -67,7 +67,8 @@ If the workflow isn't showing up:
 
 The workflow runs:
 
-1. **Daily Schedule**: Every day at 9:00 AM UTC
+1. **Monthly Schedule**: Once per month between days 1-10 (Mon-Thu and Sunday only) at 9:00 AM UTC
+   - Excludes Friday and Saturday
    - Can be modified in the `cron` expression
 2. **On Push**: When changes are pushed to `main`/`master` branch
    - Only when files in `tests/NICDDF/` are modified
@@ -81,13 +82,21 @@ The workflow runs:
 Edit `.github/workflows/nicddf-automation.yml` and modify this line:
 
 ```yaml
-- cron: "0 9 * * *" # 9:00 AM UTC daily
+- cron: "0 9 1-10 * 0,1,2,3,4" # 9:00 AM UTC, days 1-10, Mon-Thu and Sunday
 ```
 
-Common cron examples:
+**Current Config Explanation:**
+
+- Time: 9:00 AM UTC
+- Days: 1-10 of each month
+- Weekdays: Sunday(0), Monday(1), Tuesday(2), Wednesday(3), Thursday(4) - **excludes Friday(5) and Saturday(6)**
+
+**Common cron examples:**
 
 - `0 9 * * *` → Every day at 9:00 AM UTC
-- `0 9 * * 1-5` → Weekdays at 9:00 AM UTC
+- `0 9 * * 1-5` → Weekdays (Mon-Fri) at 9:00 AM UTC
+- `0 9 1-10 * *` → Days 1-10 of each month at 9:00 AM UTC
+- `0 9 15 * 1` → 15th of each month if it's a Monday at 9:00 AM UTC
 - `0 */6 * * *` → Every 6 hours
 - `0 9,17 * * *` → 9 AM and 5 PM UTC
 
