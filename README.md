@@ -7,6 +7,12 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
   <br>
   <em>Example of IPO notification received on Telegram with company details and verification status</em>
 </p>
+<p align="center">
+  <img src="screenshot/whatsapp_notifications.jpeg" width="200" alt="whatsapp Notification">
+  <br>
+  <em>Example of IPO notification received on Whatsapp with company details and verification status</em>
+</p>
+
 
 ## 🎯 What It Does
 
@@ -32,42 +38,14 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
    ```bash
    npm install
    ```
-
 2. **Install Playwright browsers:**
 
    ```bash
    npx playwright install chromium
    ```
-
-3. **Create `.env` file** in the project root:
-
-   ```env
-   # MeroShare Credentials
-   MEROSHARE_USERNAME=your_username
-   MEROSHARE_PASSWORD=your_password
-   MEROSHARE_DP_NP=your_depository_participant
-
-   # IPO Application Settings
-   MEROSHARE_BANK=your_bank_name
-   MEROSHARE_P_ACCOUNT_NO=your_account_number
-   MEROSHARE_KITTA_N0=10
-   MEROSHARE_CRN_NO=your_crn_number
-   MEROSHARE_TXN_PIN=your_4_digit_pin
-
-   # Telegram Bot (for notifications)
-   TELEGRAM_ENABLED=true
-   TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-   TELEGRAM_CHAT_ID=your_telegram_chat_id
-
-   # WhatsApp (CallMeBot)
-   WHATSAPP_ENABLED=true
-   WHATSAPP_PROVIDER=callmebot
-   WHATSAPP_ENDPOINT=https://api.callmebot.com
-   WHATSAPP_PHONE=97798XXXXXXXX
-   WHATSAPP_API_KEY=your_callmebot_apikey
-   ```
-
+3. **Create `.env` file** in the project root from `.env.example`
 4. **Setup Telegram Bot:**
+
    - Create a bot by messaging [@BotFather](https://t.me/botfather) on Telegram
    - Get your bot token
    - Get your chat ID by messaging [@userinfobot](https://t.me/userinfobot)
@@ -93,10 +71,9 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
      except:
        print('Have you sent a message to your bot? Telegram bot are quite shy 🤣.')
      ```
-
    - Add both to your `.env` file
-
 5. **Setup WhatsApp (CallMeBot):**
+
    - Go to the CallMeBot WhatsApp API page: https://www.callmebot.com/blog/free-api-whatsapp-messages/
    - Add the CallMeBot number to your WhatsApp contacts (as described on that page).
    - Send the message `I allow callmebot to send me messages` to that contact from your WhatsApp.
@@ -105,11 +82,10 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
    - Set these values in your `.env` file:
 
      ```env
-     WHATSAPP_ENABLED=true
-     WHATSAPP_PROVIDER=callmebot
-     WHATSAPP_ENDPOINT=https://api.callmebot.com
-     WHATSAPP_PHONE=97798XXXXXXXX
-     WHATSAPP_API_KEY=your_callmebot_apikey
+     WHATSAPP_ENABLED= TRUE OR FALSE
+     WHATSAPP_TO=RECEIVER_PHONE_NUMBER
+     WHATSAPP_CALLMEBOT_API_KEY=CALLMEBOT_API_KEY
+     WHATSAPP_CALLMEBOT_URL=CALLMEBOT_URL
      ```
 
 ## Running
@@ -160,6 +136,7 @@ If you want to manage secrets as code, use the `infra/` folder:
 1. **Prerequisites:** Install [OpenTofu](https://opentofu.org/) (recommended) or [Terraform](https://developer.hashicorp.com/terraform/downloads).
 2. **Create a GitHub PAT:** Generate a [Personal Access Token](https://github.com/settings/tokens) with `repo` permissions.
 3. **Configure Variables:** Create `infra/<example_secret>.tfvars`:
+
    ```hcl
    PAT = "your_github_pat"
    example_secret = {
@@ -192,6 +169,7 @@ If you want to manage secrets as code, use the `infra/` folder:
 │       ├── asba.js            # IPO detection & verification
 │       ├── ipo.js             # Form filling & submission
 │       ├── telegram.js        # Telegram notifications
+|	├── notification.js    # central notification center
 │       ├── whatsapp.js        # WhatsApp notifications (CallMeBot)
 │       └── common.js          # Utilities
 ├── .github/workflows/
@@ -204,7 +182,7 @@ If you want to manage secrets as code, use the `infra/` folder:
 ## Features
 
 - ✅ Auto-login with DP selection
-- ✅ Ordinary Shares detection (filters out Mutual Funds)
+- ✅ Ordinary Shares only detection (filters out Mutual Funds)
 - ✅ Share verification (Value Per Unit & Min Unit)
 - ✅ Auto-fill IPO application form
 - ✅ Telegram notifications
@@ -217,3 +195,4 @@ If you want to manage secrets as code, use the `infra/` folder:
 - [Playwright Documentation](https://playwright.dev)
 - [MeroShare](https://meroshare.cdsc.com.np)
 - [Moving Beyond Manual: Managing GitHub Infrastructure with OpenTofu](https://medium.com/@prazeina/moving-beyond-manual-managing-github-infrastructure-with-opentofu-f1d61a47d6fc)
+- [Free API to Send Whatsapp Messages](https://www.callmebot.com/blog/free-api-whatsapp-messages/)
