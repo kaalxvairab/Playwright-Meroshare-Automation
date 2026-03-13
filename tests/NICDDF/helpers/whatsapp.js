@@ -185,11 +185,7 @@ Time: ${new Date().toLocaleString()}`;
  * @param {string} navValue
  */
 async function notifyNICDDFNavFound(navValue) {
-  const message = `✅ NICDDF Navigation Found
-
-Navigation Value: ${navValue}
-
-Time: ${new Date().toLocaleString()}`;
+  const message = `${navValue}\n\nTime: ${new Date().toLocaleString()}`;
 
   await sendWhatsAppText(message);
 }
