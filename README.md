@@ -96,6 +96,22 @@ Automated IPO application system for MeroShare (https://meroshare.cdsc.com.np) u
 
    - Add both to your `.env` file
 
+5. **Setup WhatsApp (CallMeBot):**
+   - Go to the CallMeBot WhatsApp API page: https://www.callmebot.com/blog/free-api-whatsapp-messages/
+   - Add the CallMeBot number to your WhatsApp contacts (as described on that page).
+   - Send the message `I allow callmebot to send me messages` to that contact from your WhatsApp.
+   - After a few seconds you should receive a reply with your **API key**.
+   - Note your full phone number in international format (for Nepal it usually starts with `977`), for example: `97798XXXXXXXX`.
+   - Set these values in your `.env` file:
+
+     ```env
+     WHATSAPP_ENABLED=true
+     WHATSAPP_PROVIDER=callmebot
+     WHATSAPP_ENDPOINT=https://api.callmebot.com
+     WHATSAPP_PHONE=97798XXXXXXXX
+     WHATSAPP_API_KEY=your_callmebot_apikey
+     ```
+
 ## Running
 
 ```bash
