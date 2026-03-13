@@ -146,10 +146,10 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           # WhatsApp (CallMeBot)
           WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
-          WHATSAPP_PROVIDER: ${{ secrets.WHATSAPP_PROVIDER }}
-          WHATSAPP_ENDPOINT: ${{ secrets.WHATSAPP_ENDPOINT }}
-          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
-          WHATSAPP_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
+          # Map repo secrets to env vars expected by helpers
+          WHATSAPP_CALLMEBOT_URL: ${{ secrets.WHATSAPP_ENDPOINT }}
+          WHATSAPP_TO: ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_CALLMEBOT_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
         run: npm run automate:multi
 
       - name: Run MeroShare automation (Single User)
@@ -167,8 +167,8 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           WHATSAPP_ENABLED: ${{ secrets.WHATSAPP_ENABLED }}
-          WHATSAPP_PROVIDER: ${{ secrets.WHATSAPP_PROVIDER }}
-          WHATSAPP_ENDPOINT: ${{ secrets.WHATSAPP_ENDPOINT }}
-          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
-          WHATSAPP_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
+          # Map repo secrets to env vars expected by helpers
+          WHATSAPP_CALLMEBOT_URL: ${{ secrets.WHATSAPP_ENDPOINT }}
+          WHATSAPP_TO: ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_CALLMEBOT_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
         run: npm run automate
