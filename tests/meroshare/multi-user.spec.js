@@ -347,14 +347,26 @@ test.describe("MeroShare Multi-User IPO Automation", () => {
     }
 
     if (whatsappReady) {
-      await sendMultiUserNotification(
-        "whatsapp",
-        results,
-        cachedIpoDetails,
-        async (_chatId, message) => {
-          await sendWhatsAppText(message);
-        },
-      );
+      try {
+        console.log("[Notifications] Sending WhatsApp notification...");
+        const whatsappSent = await sendMultiUserNotification(
+          "whatsapp",
+          results,
+          cachedIpoDetails,
+          async (_chatId, message) => {
+            const success = await sendWhatsAppText(message);
+            if (!success) {
+              throw new Error("WhatsApp message failed to send");
+            }
+          },
+        );
+        console.log("[Notifications] WhatsApp notification sent");
+      } catch (error) {
+        console.error(
+          "[Notifications] Failed to send WhatsApp notification:",
+          error.message,
+        );
+      }
     }
 
     // Log summary

@@ -10,15 +10,27 @@ let whatsappConfig = null;
  * @returns {boolean} true when enabled and configured, false otherwise
  */
 function initWhatsApp(config = {}) {
+  console.log("[WhatsApp] Initializing with config:", {
+    hasConfigEnabled: config.enabled !== undefined,
+    hasEnvEnabled: process.env.WHATSAPP_ENABLED !== undefined,
+    hasConfigPhone: config.phone !== undefined,
+    hasEnvPhone: process.env.WHATSAPP_TO !== undefined,
+    hasConfigApiKey: config.apiKey !== undefined,
+    hasEnvApiKey: process.env.WHATSAPP_CALLMEBOT_API_KEY !== undefined,
+  });
+
   const enabled =
     String(
       config.enabled ?? process.env.WHATSAPP_ENABLED ?? "false",
     ).toLowerCase() === "true";
 
   if (!enabled) {
+    console.log("[WhatsApp] WhatsApp is disabled");
     whatsappConfig = { enabled: false };
     return false;
   }
+
+  console.log("[WhatsApp] WhatsApp is enabled, checking credentials...");
 
   const endpoint = config.endpoint || process.env.WHATSAPP_CALLMEBOT_URL;
   const phone = config.phone || process.env.WHATSAPP_TO;
@@ -26,7 +38,7 @@ function initWhatsApp(config = {}) {
 
   if (!phone || !apiKey) {
     console.error(
-      "WhatsApp is enabled but missing CallMeBot configuration (WHATSAPP_TO and WHATSAPP_CALLMEBOT_API_KEY).",
+      "[WhatsApp] CRITICAL: WhatsApp is enabled but missing CallMeBot configuration (WHATSAPP_TO and WHATSAPP_CALLMEBOT_API_KEY).",
     );
     whatsappConfig = { enabled: false };
     return false;
@@ -38,6 +50,11 @@ function initWhatsApp(config = {}) {
     phone: String(phone).replace(/\D/g, ""),
     apiKey,
   };
+
+  console.log("[WhatsApp] Configuration loaded successfully", {
+    phone: whatsappConfig.phone,
+    endpoint: whatsappConfig.endpoint ? "configured" : "not configured",
+  });
 
   return true;
 }
@@ -91,7 +108,7 @@ function splitWhatsAppMessage(message, chunkSize = 900) {
   return chunks;
 }
 
-async function sendViaCallMeBot(message) {
+async function sendViaCallMeBot(message, retryCount = 0, maxRetries = 3) {
   const endpoint = String(whatsappConfig.endpoint || "").trim();
   const baseUrl = endpoint.includes("whatsapp.php")
     ? endpoint
@@ -104,61 +121,111 @@ async function sendViaCallMeBot(message) {
   });
 
   const url = `${baseUrl}?${query.toString()}`;
-  const response = await fetch(url, { method: "GET" });
 
-  const rawBody = await response.text();
-  const body = rawBody.trim();
-  const bodyLower = body.toLowerCase();
-  const hasOutageSignal =
-    bodyLower.includes("service is down") || bodyLower.includes("(410)");
-  const hasFailureSignal =
-    hasOutageSignal ||
-    bodyLower.includes("error") ||
-    bodyLower.includes("invalid") ||
-    bodyLower.includes("forbidden") ||
-    bodyLower.includes("unauthorized");
-  const hasSuccessSignal =
-    bodyLower.includes("sent") ||
-    bodyLower.includes("message to:") ||
-    bodyLower.includes("text to send:") ||
-    bodyLower.includes("queued");
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-  if (hasOutageSignal) {
-    throw new Error(
-      `CallMeBot service outage detected (${response.status}): ${body || "No response body"}`,
+    const response = await fetch(url, {
+      method: "GET",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    const rawBody = await response.text();
+    const body = rawBody.trim();
+    const bodyLower = body.toLowerCase();
+    const hasOutageSignal =
+      bodyLower.includes("service is down") || bodyLower.includes("(410)");
+    const hasFailureSignal =
+      hasOutageSignal ||
+      bodyLower.includes("error") ||
+      bodyLower.includes("invalid") ||
+      bodyLower.includes("forbidden") ||
+      bodyLower.includes("unauthorized");
+    const hasSuccessSignal =
+      bodyLower.includes("sent") ||
+      bodyLower.includes("message to:") ||
+      bodyLower.includes("text to send:") ||
+      bodyLower.includes("queued");
+
+    if (hasOutageSignal) {
+      throw new Error(
+        `CallMeBot service outage detected (${response.status}): ${body || "No response body"}`,
+      );
+    }
+
+    if (!response.ok || hasFailureSignal || !hasSuccessSignal) {
+      throw new Error(
+        `CallMeBot send failed (${response.status}): ${body || "No response body"}`,
+      );
+    }
+
+    console.log(
+      `[WhatsApp] Message sent successfully on attempt ${retryCount + 1}`,
     );
-  }
+  } catch (error) {
+    const isRetryable =
+      error.name === "AbortError" ||
+      error.message.includes("CallMeBot service outage");
+    const shouldRetry = isRetryable && retryCount < maxRetries;
 
-  if (!response.ok || hasFailureSignal || !hasSuccessSignal) {
-    throw new Error(
-      `CallMeBot send failed (${response.status}): ${body || "No response body"}`,
+    console.error(
+      `[WhatsApp] Attempt ${retryCount + 1}/${maxRetries + 1} failed: ${error.message}`,
     );
+
+    if (shouldRetry) {
+      const delayMs = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+      console.log(`[WhatsApp] Retrying in ${delayMs}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return sendViaCallMeBot(message, retryCount + 1, maxRetries);
+    } else {
+      throw error;
+    }
   }
 }
 
 /**
  * Send plain text message to WhatsApp
  * @param {string} message
+ * @returns {Promise<boolean>} true if sent successfully, false otherwise
  */
 async function sendWhatsAppText(message) {
+  // Ensure environment variables are properly loaded
   if (!whatsappConfig) {
-    initWhatsApp();
+    const initialized = initWhatsApp();
+    if (!initialized) {
+      console.warn("[WhatsApp] WhatsApp not initialized or enabled");
+      return false;
+    }
   }
 
   if (!whatsappConfig || !whatsappConfig.enabled) {
-    return;
+    console.warn("[WhatsApp] WhatsApp is not enabled");
+    return false;
   }
 
   try {
     const chunks = splitWhatsAppMessage(message);
+    console.log(`[WhatsApp] Sending ${chunks.length} chunk(s)`);
 
-    for (const chunk of chunks) {
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      console.log(
+        `[WhatsApp] Sending chunk ${i + 1}/${chunks.length} (${chunk.length} chars)`,
+      );
       await sendViaCallMeBot(chunk);
     }
 
-    console.log(`WhatsApp notification sent successfully`);
+    console.log(`[WhatsApp] All ${chunks.length} chunk(s) sent successfully`);
+    return true;
   } catch (error) {
-    console.error("Failed to send WhatsApp message:", error.message);
+    console.error("[WhatsApp] FAILED to send WhatsApp message:", {
+      message: error.message,
+      stack: error.stack,
+    });
+    return false;
   }
 }
 
