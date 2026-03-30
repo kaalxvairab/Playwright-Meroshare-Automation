@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  automation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: playwright-automation
+
+    # Load environment variables from .env file
+    env_file:
+      - .env
+
+    # Mount volumes for persistent output
+    volumes:
+      - ./test-results:/app/test-results
+      - ./playwright-report:/app/playwright-report
+      - ./screenshot:/app/screenshot
+
+    # Override environment variables if needed
+    environment:
+      - CI=true
+
+    # Restart policy
+    restart: no
+
+    # Run in interactive mode for debugging (optional)
+    # stdin_open: true
+    # tty: true
