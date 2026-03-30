@@ -1,0 +1,65 @@
+name: Playwright Tests (Docker)
+
+on:
+  # Run daily at 6 AM UTC
+  schedule:
+    - cron: "0 6 * * *"
+
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+  # Run on push to main branch (optional, for testing)
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  test:
+    name: "Run Playwright Tests"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file from secrets
+        run: |
+          cat > .env << EOF
+          MEROSHARE_USERNAME=${{ secrets.MEROSHARE_USERNAME }}
+          MEROSHARE_PASSWORD=${{ secrets.MEROSHARE_PASSWORD }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_ENABLED=${{ secrets.TELEGRAM_ENABLED }}
+          WHATSAPP_PHONE=${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_API_KEY=${{ secrets.WHATSAPP_API_KEY }}
+          WHATSAPP_ENABLED=${{ secrets.WHATSAPP_ENABLED }}
+          EOF
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t playwright-automation:latest .
+
+      - name: Run tests with Docker Compose
+        run: docker-compose up --exit-code-from automation
+        env:
+          CI: true
+
+      - name: Upload test results (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            test-results/
+            playwright-report/
+            screenshot/
+          retention-days: 30
+
+      - name: Test failure notification
+        if: failure()
+        run: |
+          echo "❌ Playwright tests failed!"
+          echo "Check the workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
