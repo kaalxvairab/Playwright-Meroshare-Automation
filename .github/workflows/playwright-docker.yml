@@ -7,6 +7,15 @@ on:
 
   # Allow manual trigger from GitHub UI
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run mode"
+        required: false
+        default: "multi"
+        type: choice
+        options:
+          - single
+          - multi
 
   # Run on push to main/master/docker branches (optional, for testing)
   push:
@@ -27,14 +36,126 @@ jobs:
       - name: Create .env file from secrets
         run: |
           cat > .env << EOF
+          # Primary User (User 1)
           MEROSHARE_USERNAME=${{ secrets.MEROSHARE_USERNAME }}
           MEROSHARE_PASSWORD=${{ secrets.MEROSHARE_PASSWORD }}
+          MEROSHARE_DP_NP=${{ secrets.MEROSHARE_DP_NP }}
+          MEROSHARE_BANK=${{ secrets.MEROSHARE_BANK }}
+          MEROSHARE_P_ACCOUNT_NO=${{ secrets.MEROSHARE_P_ACCOUNT_NO }}
+          MEROSHARE_KITTA_N0=${{ secrets.MEROSHARE_KITTA_N0 }}
+          MEROSHARE_CRN_NO=${{ secrets.MEROSHARE_CRN_NO }}
+          MEROSHARE_TXN_PIN=${{ secrets.MEROSHARE_TXN_PIN }}
+          USER1_NAME=${{ secrets.USER1_NAME }}
+
+          # User 2
+          USER2_NAME=${{ secrets.USER2_NAME }}
+          USER2_USERNAME=${{ secrets.USER2_USERNAME }}
+          USER2_PASSWORD=${{ secrets.USER2_PASSWORD }}
+          USER2_DP=${{ secrets.USER2_DP }}
+          USER2_BANK=${{ secrets.USER2_BANK }}
+          USER2_ACCOUNT_NO=${{ secrets.USER2_ACCOUNT_NO }}
+          USER2_KITTA=${{ secrets.USER2_KITTA }}
+          USER2_CRN=${{ secrets.USER2_CRN }}
+          USER2_TXN_PIN=${{ secrets.USER2_TXN_PIN }}
+
+          # User 3
+          USER3_NAME=${{ secrets.USER3_NAME }}
+          USER3_USERNAME=${{ secrets.USER3_USERNAME }}
+          USER3_PASSWORD=${{ secrets.USER3_PASSWORD }}
+          USER3_DP=${{ secrets.USER3_DP }}
+          USER3_BANK=${{ secrets.USER3_BANK }}
+          USER3_ACCOUNT_NO=${{ secrets.USER3_ACCOUNT_NO }}
+          USER3_KITTA=${{ secrets.USER3_KITTA }}
+          USER3_CRN=${{ secrets.USER3_CRN }}
+          USER3_TXN_PIN=${{ secrets.USER3_TXN_PIN }}
+
+          # User 4
+          USER4_NAME=${{ secrets.USER4_NAME }}
+          USER4_USERNAME=${{ secrets.USER4_USERNAME }}
+          USER4_PASSWORD=${{ secrets.USER4_PASSWORD }}
+          USER4_DP=${{ secrets.USER4_DP }}
+          USER4_BANK=${{ secrets.USER4_BANK }}
+          USER4_ACCOUNT_NO=${{ secrets.USER4_ACCOUNT_NO }}
+          USER4_KITTA=${{ secrets.USER4_KITTA }}
+          USER4_CRN=${{ secrets.USER4_CRN }}
+          USER4_TXN_PIN=${{ secrets.USER4_TXN_PIN }}
+
+          # User 5
+          USER5_NAME=${{ secrets.USER5_NAME }}
+          USER5_USERNAME=${{ secrets.USER5_USERNAME }}
+          USER5_PASSWORD=${{ secrets.USER5_PASSWORD }}
+          USER5_DP=${{ secrets.USER5_DP }}
+          USER5_BANK=${{ secrets.USER5_BANK }}
+          USER5_ACCOUNT_NO=${{ secrets.USER5_ACCOUNT_NO }}
+          USER5_KITTA=${{ secrets.USER5_KITTA }}
+          USER5_CRN=${{ secrets.USER5_CRN }}
+          USER5_TXN_PIN=${{ secrets.USER5_TXN_PIN }}
+
+          # User 6
+          USER6_NAME=${{ secrets.USER6_NAME }}
+          USER6_USERNAME=${{ secrets.USER6_USERNAME }}
+          USER6_PASSWORD=${{ secrets.USER6_PASSWORD }}
+          USER6_DP=${{ secrets.USER6_DP }}
+          USER6_BANK=${{ secrets.USER6_BANK }}
+          USER6_ACCOUNT_NO=${{ secrets.USER6_ACCOUNT_NO }}
+          USER6_KITTA=${{ secrets.USER6_KITTA }}
+          USER6_CRN=${{ secrets.USER6_CRN }}
+          USER6_TXN_PIN=${{ secrets.USER6_TXN_PIN }}
+
+          # User 7
+          USER7_NAME=${{ secrets.USER7_NAME }}
+          USER7_USERNAME=${{ secrets.USER7_USERNAME }}
+          USER7_PASSWORD=${{ secrets.USER7_PASSWORD }}
+          USER7_DP=${{ secrets.USER7_DP }}
+          USER7_BANK=${{ secrets.USER7_BANK }}
+          USER7_ACCOUNT_NO=${{ secrets.USER7_ACCOUNT_NO }}
+          USER7_KITTA=${{ secrets.USER7_KITTA }}
+          USER7_CRN=${{ secrets.USER7_CRN }}
+          USER7_TXN_PIN=${{ secrets.USER7_TXN_PIN }}
+
+          # User 8
+          USER8_NAME=${{ secrets.USER8_NAME }}
+          USER8_USERNAME=${{ secrets.USER8_USERNAME }}
+          USER8_PASSWORD=${{ secrets.USER8_PASSWORD }}
+          USER8_DP=${{ secrets.USER8_DP }}
+          USER8_BANK=${{ secrets.USER8_BANK }}
+          USER8_ACCOUNT_NO=${{ secrets.USER8_ACCOUNT_NO }}
+          USER8_KITTA=${{ secrets.USER8_KITTA }}
+          USER8_CRN=${{ secrets.USER8_CRN }}
+          USER8_TXN_PIN=${{ secrets.USER8_TXN_PIN }}
+
+          # User 9
+          USER9_NAME=${{ secrets.USER9_NAME }}
+          USER9_USERNAME=${{ secrets.USER9_USERNAME }}
+          USER9_PASSWORD=${{ secrets.USER9_PASSWORD }}
+          USER9_DP=${{ secrets.USER9_DP }}
+          USER9_BANK=${{ secrets.USER9_BANK }}
+          USER9_ACCOUNT_NO=${{ secrets.USER9_ACCOUNT_NO }}
+          USER9_KITTA=${{ secrets.USER9_KITTA }}
+          USER9_CRN=${{ secrets.USER9_CRN }}
+          USER9_TXN_PIN=${{ secrets.USER9_TXN_PIN }}
+
+          # User 10
+          USER10_NAME=${{ secrets.USER10_NAME }}
+          USER10_USERNAME=${{ secrets.USER10_USERNAME }}
+          USER10_PASSWORD=${{ secrets.USER10_PASSWORD }}
+          USER10_DP=${{ secrets.USER10_DP }}
+          USER10_BANK=${{ secrets.USER10_BANK }}
+          USER10_ACCOUNT_NO=${{ secrets.USER10_ACCOUNT_NO }}
+          USER10_KITTA=${{ secrets.USER10_KITTA }}
+          USER10_CRN=${{ secrets.USER10_CRN }}
+          USER10_TXN_PIN=${{ secrets.USER10_TXN_PIN }}
+
+          # Telegram
+          TELEGRAM_ENABLED=${{ secrets.TELEGRAM_ENABLED }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_ENABLED=${{ secrets.TELEGRAM_ENABLED }}
-          WHATSAPP_PHONE=${{ secrets.WHATSAPP_PHONE }}
-          WHATSAPP_API_KEY=${{ secrets.WHATSAPP_API_KEY }}
+
+          # WhatsApp (CallMeBot)
           WHATSAPP_ENABLED=${{ secrets.WHATSAPP_ENABLED }}
+          WHATSAPP_CALLMEBOT_URL=${{ secrets.WHATSAPP_CALLMEBOT_URL }}
+          WHATSAPP_TO=${{ secrets.WHATSAPP_TO }}
+          WHATSAPP_CALLMEBOT_API_KEY=${{ secrets.WHATSAPP_CALLMEBOT_API_KEY }}
           EOF
 
       - name: Set up Docker Buildx
@@ -43,8 +164,15 @@ jobs:
       - name: Build Docker image
         run: docker build -t playwright-automation:latest .
 
-      - name: Run tests with Docker Compose
-        run: docker compose up --exit-code-from automation
+      - name: Run single-user test
+        if: ${{ github.event.inputs.mode == 'single' }}
+        run: docker compose run automation npm run automate
+        env:
+          CI: true
+
+      - name: Run multi-user test (default)
+        if: ${{ github.event.inputs.mode != 'single' || github.event_name != 'workflow_dispatch' }}
+        run: docker compose run automation npm run automate:multi
         env:
           CI: true
 
