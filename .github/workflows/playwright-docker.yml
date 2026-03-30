@@ -44,7 +44,7 @@ jobs:
         run: docker build -t playwright-automation:latest .
 
       - name: Run tests with Docker Compose
-        run: docker-compose up --exit-code-from automation
+        run: docker compose up --exit-code-from automation
         env:
           CI: true
 
