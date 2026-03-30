@@ -8,11 +8,12 @@ on:
   # Allow manual trigger from GitHub UI
   workflow_dispatch:
 
-  # Run on push to main branch (optional, for testing)
+  # Run on push to main/master/docker branches (optional, for testing)
   push:
     branches:
       - main
       - master
+      - docker
 
 jobs:
   test:
